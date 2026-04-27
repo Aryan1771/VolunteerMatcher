@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Smart Volunteer Matching System{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    {% block head %}{% endblock %}
+  </head>
+  <body class="min-h-screen bg-slate-50 text-slate-900">
+    <header class="border-b border-slate-200 bg-white">
+      <nav class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4">
+        <a href="{{ url_for('home_page') }}" class="text-lg font-semibold tracking-tight">Smart Volunteer Matching</a>
+        <div class="flex flex-wrap gap-2 text-sm">
+          <a class="nav-link" href="{{ url_for('report_problem_page') }}">Report Problem</a>
+          <a class="nav-link" href="{{ url_for('register_volunteer_page') }}">Volunteer</a>
+          <a class="nav-link" href="{{ url_for('admin_login_page') }}">Admin</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="mx-auto max-w-6xl px-4 py-8">
+      {% block content %}
+        <section class="rounded-lg border border-slate-200 bg-white p-8">
+          <h1 class="text-2xl font-semibold">{{ content_title }}</h1>
+        </section>
+      {% endblock %}
+    </main>
+
+    <footer class="border-t border-slate-200 py-5 text-center text-sm text-slate-500">
+      Smart Volunteer Matching System
+    </footer>
+
+    <section id="chatbotWidget" class="chatbot-widget" aria-label="Help chatbot">
+      <button id="chatbotToggle" class="chatbot-toggle" type="button" aria-expanded="false">
+        Help
+      </button>
+      <div id="chatbotPanel" class="chatbot-panel hidden">
+        <div class="chatbot-header">
+          <div>
+            <p class="text-sm font-bold text-slate-950">Volunteer Help</p>
+            <p class="text-xs text-slate-500">Powered by Gemini</p>
+          </div>
+          <button id="chatbotClose" class="chatbot-close" type="button" aria-label="Close chatbot">x</button>
+        </div>
+        <div id="chatbotMessages" class="chatbot-messages">
+          <div class="chatbot-message bot">Hi, I can help you use this volunteer matching system.</div>
+        </div>
+        <form id="chatbotForm" class="chatbot-form">
+          <input id="chatbotInput" class="chatbot-input" type="text" placeholder="Ask for help..." maxlength="1000" autocomplete="off">
+          <button class="chatbot-send" type="submit">Send</button>
+        </form>
+      </div>
+    </section>
+
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

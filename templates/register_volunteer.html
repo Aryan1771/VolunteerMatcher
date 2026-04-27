@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Register Volunteer | Smart Volunteer Matching System{% endblock %}
+
+{% block content %}
+  <section class="mx-auto max-w-2xl rounded-lg border border-slate-200 bg-white p-6">
+    <h1 class="text-2xl font-semibold">Register as Volunteer</h1>
+
+    <form id="volunteerForm" class="mt-6 space-y-5">
+      <div>
+        <label class="form-label" for="volunteerName">Name</label>
+        <input id="volunteerName" name="name" class="form-input" type="text" placeholder="Rahul Sharma" required>
+      </div>
+
+      <fieldset>
+        <legend class="form-label">Skills</legend>
+        <div class="grid gap-3 sm:grid-cols-3">
+          <label class="checkbox-card">
+            <input type="checkbox" name="skills" value="water">
+            <span>Water</span>
+          </label>
+          <label class="checkbox-card">
+            <input type="checkbox" name="skills" value="health">
+            <span>Health</span>
+          </label>
+          <label class="checkbox-card">
+            <input type="checkbox" name="skills" value="education">
+            <span>Education</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <div>
+        <label class="form-label" for="preferredLocation">Preferred Location</label>
+        <input id="preferredLocation" name="preferredLocation" class="form-input" type="text" placeholder="Mumbai" required>
+      </div>
+
+      <div>
+        <label class="form-label" for="availability">Availability</label>
+        <select id="availability" name="availability" class="form-input" required>
+          <option value="">Select availability</option>
+          <option value="weekdays">Weekdays</option>
+          <option value="weekends">Weekends</option>
+          <option value="anytime">Anytime</option>
+        </select>
+      </div>
+
+      <div id="volunteerMessage" class="hidden rounded-md px-4 py-3 text-sm"></div>
+
+      <button class="primary-button w-full" type="submit">Register Volunteer</button>
+    </form>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/forms.js') }}"></script>
+{% endblock %}

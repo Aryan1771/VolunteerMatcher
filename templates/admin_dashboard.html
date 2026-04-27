@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard | Smart Volunteer Matching System{% endblock %}
+
+{% block head %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+  <section class="space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <p class="text-sm font-medium text-slate-500">Logged in as {{ admin_username }}</p>
+        <h1 class="text-3xl font-semibold tracking-tight">Admin Dashboard</h1>
+      </div>
+      <a class="secondary-button" href="{{ url_for('admin_logout_page') }}">Logout</a>
+    </div>
+
+    <div id="dashboardMessage" class="hidden rounded-md px-4 py-3 text-sm"></div>
+
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="stat-card"><span>Total Problems</span><strong id="totalProblems">0</strong></div>
+      <div class="stat-card"><span>Total Volunteers</span><strong id="totalVolunteers">0</strong></div>
+      <div class="stat-card"><span>Open Problems</span><strong id="openProblems">0</strong></div>
+      <div class="stat-card"><span>Resolved Problems</span><strong id="resolvedProblems">0</strong></div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+      <section class="rounded-lg border border-slate-200 bg-white p-5">
+        <h2 class="text-lg font-semibold">Problem Type Distribution</h2>
+        <div class="mt-4 chart-box">
+          <canvas id="problemTypeChart"></canvas>
+        </div>
+      </section>
+
+      <section class="rounded-lg border border-slate-200 bg-white p-5">
+        <h2 class="text-lg font-semibold">Area-wise Problems</h2>
+        <div class="mt-4 chart-box">
+          <canvas id="areaChart"></canvas>
+        </div>
+      </section>
+    </div>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5">
+      <h2 class="text-lg font-semibold">Problems</h2>
+      <div class="mt-4 overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Location</th>
+              <th>Type</th>
+              <th>Severity</th>
+              <th>Status</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody id="problemsTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5">
+      <h2 class="text-lg font-semibold">Volunteers</h2>
+      <div class="mt-4 overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Skills</th>
+              <th>Preferred Location</th>
+              <th>Availability</th>
+            </tr>
+          </thead>
+          <tbody id="volunteersTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="rounded-lg border border-slate-200 bg-white p-5">
+      <h2 class="text-lg font-semibold">Recommended Volunteers</h2>
+      <div class="mt-4 overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Problem</th>
+              <th>Location</th>
+              <th>Top Matches</th>
+            </tr>
+          </thead>
+          <tbody id="recommendationsTable"></tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
