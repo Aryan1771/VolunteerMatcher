@@ -5,11 +5,13 @@ A beginner-friendly Flask web application that collects local problem reports, r
 ## Tech Stack
 
 - Python Flask
-- MongoDB Atlas
+- Google Cloud Firestore
+- Google Cloud Run
+- Google Cloud Build
+- Google Gemini API
 - HTML, CSS, and JavaScript
 - Tailwind CSS CDN
 - Chart.js CDN
-- Render free web service
 
 ## Features
 
@@ -29,7 +31,8 @@ A beginner-friendly Flask web application that collects local problem reports, r
 VolunteerMatcher/
 ├── app.py
 ├── requirements.txt
-├── render.yaml
+├── Procfile
+├── cloudbuild.yaml
 ├── .env.example
 ├── config/
 ├── models/
@@ -40,13 +43,13 @@ VolunteerMatcher/
 └── static/
 ```
 
-## MongoDB Collections
+## Firestore Collections
 
 ### problems
 
 ```json
 {
-  "_id": "ObjectId",
+  "id": "Firestore document id",
   "location": "Mumbai",
   "problemType": "water",
   "severity": 4,
@@ -61,7 +64,7 @@ VolunteerMatcher/
 
 ```json
 {
-  "_id": "ObjectId",
+  "id": "Firestore document id",
   "name": "Rahul Sharma",
   "skills": ["water", "health"],
   "preferredLocation": "Mumbai",
@@ -144,57 +147,117 @@ The app sorts volunteers by score and returns the top 3.
 
 ## Run Locally
 
-1. Create and activate a virtual environment:
+1. Install the Google Cloud CLI and sign in:
+
+```bash
+gcloud auth login
+gcloud auth application-default login
+```
+
+2. Create and activate a virtual environment:
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
-2. Install dependencies:
+3. Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Create a `.env` file from `.env.example`:
+4. Create a `.env` file from `.env.example`:
 
 ```bash
 copy .env.example .env
 ```
 
-4. Update `.env` with your MongoDB Atlas connection string and admin credentials.
+5. Update `.env` with your Google Cloud project id, admin credentials, and Gemini API key.
 
-5. Start the app:
+6. Make sure Firestore is enabled in your Google Cloud project.
+
+7. Start the app:
 
 ```bash
 flask --app app run
 ```
 
-6. Open:
+8. Open:
 
 ```txt
 http://127.0.0.1:5000
 ```
 
-## Deploy on Render Free Tier
+## Deploy on Google Cloud Run
 
-1. Push this repository to GitHub.
-2. Create a new Render Web Service.
-3. Connect the GitHub repository.
-4. Use these settings:
+1. Create or choose a Google Cloud project.
 
-```txt
-Environment: Python
-Build Command: pip install -r requirements.txt
-Start Command: gunicorn app:app
+2. Enable required APIs:
+
+```bash
+gcloud services enable run.googleapis.com cloudbuild.googleapis.com firestore.googleapis.com artifactregistry.googleapis.com secretmanager.googleapis.com
 ```
 
-5. Add environment variables:
+3. Create a Firestore database in Native mode from the Google Cloud Console.
+
+4. Deploy from the repository folder:
+
+```bash
+gcloud run deploy volunteer-matcher ^
+  --source . ^
+  --region asia-south1 ^
+  --allow-unauthenticated ^
+  --set-env-vars ADMIN_USERNAME=admin,ADMIN_PASSWORD=change-this-password,SECRET_KEY=change-this-secret,GEMINI_API_KEY=your-gemini-key,GEMINI_MODEL=gemini-2.5-flash,FLASK_ENV=production
+```
+
+5. Open the Cloud Run service URL printed by the command.
+
+## Optional Firebase Hosting Front Door
+
+Use Firebase Hosting if you want a Firebase website URL or custom domain while still running Flask on Cloud Run.
+
+1. Install Firebase CLI:
+
+```bash
+npm install -g firebase-tools
+```
+
+2. Sign in and initialize hosting:
+
+```bash
+firebase login
+firebase init hosting
+```
+
+3. Configure `firebase.json` with a Cloud Run rewrite:
+
+```json
+{
+  "hosting": {
+    "rewrites": [
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "volunteer-matcher",
+          "region": "asia-south1"
+        }
+      }
+    ]
+  }
+}
+```
+
+4. Deploy:
+
+```bash
+firebase deploy
+```
+
+## Environment Variables
 
 ```txt
-MONGO_URI
-MONGO_DB_NAME
+GOOGLE_CLOUD_PROJECT
 ADMIN_USERNAME
 ADMIN_PASSWORD
 SECRET_KEY
@@ -203,10 +266,9 @@ GEMINI_MODEL=gemini-2.5-flash
 FLASK_ENV=production
 ```
 
-6. Deploy the service.
-
 ## Notes
 
-- `MONGO_URI` is required for forms, APIs, and dashboard data.
+- Firestore is the database for forms, APIs, and dashboard data.
+- Cloud Run uses its Google service account automatically when deployed on Google Cloud.
 - Admin credentials are stored in environment variables for simplicity.
 - The existing GPLv3 license is preserved.

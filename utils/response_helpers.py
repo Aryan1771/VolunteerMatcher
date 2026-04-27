@@ -1,4 +1,3 @@
-from bson import ObjectId
 from flask import jsonify
 
 
@@ -27,8 +26,9 @@ def error_response(message, status_code=400, errors=None):
     return jsonify(payload), status_code
 
 
-def object_id_from_string(value):
-    if not ObjectId.is_valid(value):
+def valid_document_id(value):
+    value = str(value or "").strip()
+    if not value or "/" in value:
         return None
 
-    return ObjectId(value)
+    return value
