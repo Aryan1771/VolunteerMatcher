@@ -1,97 +1,227 @@
-# VolunteerMatcher
+﻿# Smart Volunteer Matching System
 
-VolunteerMatcher is a Flask web application for connecting local community problems with suitable volunteers. It includes public forms for reporting problems and registering volunteers, an admin dashboard for reviewing submissions, a simple recommendation engine, and an optional Gemini-powered help chatbot.
+VolunteerMatcher is a beginner-friendly Flask web application for connecting local community problems with suitable volunteers. It includes public forms for reporting problems and registering volunteers, an admin dashboard with charts, a simple recommendation engine, and a Gemini-powered help chatbot.
+
+## Tech Stack
+
+- Python Flask
+- MongoDB Atlas
+- HTML, CSS, and JavaScript
+- Tailwind CSS CDN
+- Chart.js CDN
+- Google Gemini API
+- Render free web service
 
 ## Features
 
 - Public landing page with separate flows for problem reports and volunteer registration
 - Admin login and dashboard pages for managing submitted data
 - REST-style API routes for problems, volunteers, dashboard data, and chatbot support
-- Firestore-backed persistence through Google Cloud Firestore
+- MongoDB Atlas persistence through PyMongo
 - Volunteer matching score based on location, skills, severity, and availability
-- Optional Gemini chatbot that answers questions about how the application works
-- Cloud deployment files for Gunicorn/Procfile and Google Cloud Build
+- Problem type pie chart and area-wise bar chart
+- Gemini chatbot that answers questions about how the application works
 
-## Tech Stack
+## Folder Structure
 
-- Python
-- Flask
-- Google Cloud Firestore
-- Google Gemini API
-- HTML, CSS, and JavaScript
-- Gunicorn for production serving
-
-## Project Structure
-
-```text
-app.py                  Flask application entry point
-config/                 Firestore configuration
-models/                 Problem and volunteer document builders
-routes/                 Auth, dashboard, problem, volunteer, and chatbot routes
-services/               Gemini and volunteer matching services
-static/                 Frontend CSS and JavaScript
-templates/              Jinja HTML templates
-utils/                  Validation and response helpers
-cloudbuild.yaml         Google Cloud deployment configuration
-Procfile                Production process definition
+```txt
+VolunteerMatcher/
+|-- app.py
+|-- requirements.txt
+|-- render.yaml
+|-- .env.example
+|-- config/
+|-- models/
+|-- routes/
+|-- services/
+|-- utils/
+|-- templates/
+`-- static/
 ```
 
-## Getting Started
+## MongoDB Collections
 
-### 1. Create a virtual environment
+### problems
+
+```json
+{
+  "_id": "ObjectId",
+  "location": "Mumbai",
+  "problemType": "water",
+  "severity": 4,
+  "description": "No clean drinking water nearby.",
+  "status": "open",
+  "createdAt": "datetime",
+  "updatedAt": "datetime"
+}
+```
+
+### volunteers
+
+```json
+{
+  "_id": "ObjectId",
+  "name": "Rahul Sharma",
+  "skills": ["water", "health"],
+  "preferredLocation": "Mumbai",
+  "availability": "weekends",
+  "createdAt": "datetime",
+  "updatedAt": "datetime"
+}
+```
+
+## API Endpoints
+
+### Auth
+
+```http
+POST /api/auth/login
+POST /api/auth/logout
+GET  /api/auth/me
+```
+
+### Problems
+
+```http
+POST   /api/problems
+GET    /api/problems
+GET    /api/problems/:id
+PATCH  /api/problems/:id
+DELETE /api/problems/:id
+GET    /api/problems/:id/recommendations
+```
+
+### Volunteers
+
+```http
+POST   /api/volunteers
+GET    /api/volunteers
+GET    /api/volunteers/:id
+PATCH  /api/volunteers/:id
+DELETE /api/volunteers/:id
+```
+
+### Dashboard
+
+```http
+GET /api/dashboard/summary
+GET /api/dashboard/problem-types
+GET /api/dashboard/area-problems
+GET /api/dashboard/recommendations
+```
+
+Admin-only endpoints require a successful login through `/api/auth/login`.
+
+### Chatbot
+
+```http
+POST /api/chatbot/message
+```
+
+Request:
+
+```json
+{
+  "message": "How do I register as a volunteer?"
+}
+```
+
+The chatbot uses the Gemini API from the Flask backend so the browser never sees your API key.
+
+## Matching Algorithm
+
+Each volunteer receives a score for a problem:
+
+```txt
+Location match       +40
+Skill match          +40
+Severity priority    severity * 4
+Anytime availability +10
+```
+
+The app sorts volunteers by score and returns the top 3.
+
+## Run Locally
+
+1. Create and activate a virtual environment:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-### 2. Install dependencies
+2. Install dependencies:
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-### 3. Configure environment variables
-
-Copy the example environment file and fill in your project-specific values.
+3. Create a `.env` file from `.env.example`:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Required or commonly used values:
+4. Update `.env` with your MongoDB Atlas connection string, admin credentials, and Gemini API key.
 
-```text
-GOOGLE_CLOUD_PROJECT=your-google-cloud-project-id
-GOOGLE_APPLICATION_CREDENTIALS=C:\path\to\service-account-key.json
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=change-this-password
-SECRET_KEY=change-this-secret-key
-GEMINI_API_KEY=your-google-ai-studio-api-key
-GEMINI_MODEL=gemini-2.5-flash
-```
-
-### 4. Run the application
+5. Start the app:
 
 ```powershell
-python app.py
+flask --app app run
 ```
 
-The local development server starts with Flask debug mode enabled unless `FLASK_ENV` is set to `production`.
+6. Open:
 
-## API Highlights
+```txt
+http://127.0.0.1:5000
+```
 
-- `POST /api/problems` submits a new community problem
-- `POST /api/volunteers` registers a new volunteer
-- `GET /api/problems` lists problems for authenticated admins
-- `GET /api/volunteers` lists volunteers for authenticated admins
-- `GET /api/problems/<problem_id>/recommendations` returns top volunteer matches
-- `POST /api/chatbot` sends a help question to the Gemini-backed chatbot
+## Deploy on Render Free Tier
+
+1. Push this repository to GitHub.
+2. Create a free MongoDB Atlas cluster and copy its connection string.
+3. In MongoDB Atlas, create a database user and allow network access from Render. For a beginner demo, `0.0.0.0/0` is the simplest option; use a strong database password.
+4. Create a new Render Web Service.
+5. Connect the GitHub repository: `Aryan1771/VolunteerMatcher`.
+6. Use these settings:
+
+```txt
+Environment: Python
+Build Command: pip install -r requirements.txt
+Start Command: gunicorn app:app
+```
+
+7. Add environment variables:
+
+```txt
+MONGO_URI=your-mongodb-atlas-connection-string
+MONGO_DB_NAME=volunteer_matcher
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your-strong-admin-password
+SECRET_KEY=your-long-random-secret
+GEMINI_API_KEY=your-google-ai-studio-api-key
+GEMINI_MODEL=gemini-2.5-flash
+FLASK_ENV=production
+```
+
+8. Deploy the service and open the Render URL.
+
+## Database Alternatives
+
+The current code is configured for MongoDB Atlas because it works well with Render free deployments and the existing PyMongo data layer.
+
+| Database | Best For | Notes |
+| --- | --- | --- |
+| MongoDB Atlas | Recommended for this version | Cloud hosted, free tier available, works with the current code. |
+| Render PostgreSQL | SQL-based Render deployment | Requires replacing PyMongo with SQLAlchemy or psycopg and rewriting queries. |
+| Supabase PostgreSQL | Hosted PostgreSQL with a generous free tier | Requires a SQL schema and query rewrite. |
+| Firebase Firestore | Google-based NoSQL | Requires replacing the MongoDB helper and query code; best if moving the whole app to Google Cloud Run. |
+| SQLite | Local demo only | Easy for learning, but not reliable for Render free production data. |
+
+For the fastest working website, keep MongoDB Atlas. For a Google-only stack, use Firestore and deploy on Cloud Run instead of Render.
 
 ## Notes
 
-This project is designed as a practical full-stack learning app. For production use, replace default credentials, use strong secrets, configure Firestore security carefully, and deploy with a service account that has only the permissions the app needs.
-
-## License
-
-This repository is licensed under the GPL-3.0 license. See `LICENSE` for details.
+- `MONGO_URI` is required for forms, APIs, and dashboard data.
+- Admin credentials are stored in environment variables for simplicity.
+- The existing GPLv3 license is preserved.

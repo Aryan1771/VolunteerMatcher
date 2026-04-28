@@ -1,69 +1,34 @@
-from google.cloud import firestore
+import os
+
+from pymongo import MongoClient
+from pymongo.errors import PyMongoError
 
 
+_client = None
 _db = None
 
 
 def get_db():
-    """Create one shared Firestore client and reuse it for every request."""
-    global _db
+    """Create one shared MongoDB connection and reuse it for every request."""
+    global _client, _db
 
-    if _db is None:
-        _db = firestore.Client()
+    if _db is not None:
+        return _db
 
-    return _db
+    mongo_uri = os.getenv("MONGO_URI")
+    db_name = os.getenv("MONGO_DB_NAME", "volunteer_matcher")
+
+    if not mongo_uri:
+        raise RuntimeError("MONGO_URI is not configured. Add it to .env or Render environment variables.")
+
+    try:
+        _client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)
+        _client.admin.command("ping")
+        _db = _client[db_name]
+        return _db
+    except PyMongoError as exc:
+        raise RuntimeError(f"Could not connect to MongoDB: {exc}") from exc
 
 
 def get_collection(name):
-    return get_db().collection(name)
-
-
-def snapshot_to_dict(snapshot):
-    data = snapshot.to_dict()
-    if data is None:
-        return None
-
-    data["_id"] = snapshot.id
-    return data
-
-
-def create_document(collection_name, data):
-    _, document_ref = get_collection(collection_name).add(data)
-    data["_id"] = document_ref.id
-    return data
-
-
-def get_document(collection_name, document_id):
-    snapshot = get_collection(collection_name).document(document_id).get()
-    if not snapshot.exists:
-        return None
-
-    return snapshot_to_dict(snapshot)
-
-
-def list_documents(collection_name, order_by=None, descending=False):
-    query = get_collection(collection_name)
-
-    if order_by:
-        direction = firestore.Query.DESCENDING if descending else firestore.Query.ASCENDING
-        query = query.order_by(order_by, direction=direction)
-
-    return [snapshot_to_dict(snapshot) for snapshot in query.stream()]
-
-
-def update_document(collection_name, document_id, data):
-    document_ref = get_collection(collection_name).document(document_id)
-    if not document_ref.get().exists:
-        return None
-
-    document_ref.update(data)
-    return get_document(collection_name, document_id)
-
-
-def delete_document(collection_name, document_id):
-    document_ref = get_collection(collection_name).document(document_id)
-    if not document_ref.get().exists:
-        return False
-
-    document_ref.delete()
-    return True
+    return get_db()[name]

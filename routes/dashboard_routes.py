@@ -1,10 +1,8 @@
-from collections import Counter
-
-from google.api_core.exceptions import GoogleAPIError
+from pymongo.errors import PyMongoError
 
 from flask import Blueprint
 
-from config.database import list_documents
+from config.database import get_collection
 from models.problem_model import serialize_problem
 from models.volunteer_model import serialize_volunteer
 from routes.auth_routes import admin_required
@@ -19,18 +17,18 @@ dashboard_bp = Blueprint("dashboard", __name__, url_prefix="/api/dashboard")
 @admin_required
 def dashboard_summary():
     try:
-        problems = list_documents("problems")
-        volunteers = list_documents("volunteers")
+        problems = get_collection("problems")
+        volunteers = get_collection("volunteers")
 
         data = {
-            "totalProblems": len(problems),
-            "totalVolunteers": len(volunteers),
-            "openProblems": sum(1 for problem in problems if problem.get("status") == "open"),
-            "resolvedProblems": sum(1 for problem in problems if problem.get("status") == "resolved"),
+            "totalProblems": problems.count_documents({}),
+            "totalVolunteers": volunteers.count_documents({}),
+            "openProblems": problems.count_documents({"status": "open"}),
+            "resolvedProblems": problems.count_documents({"status": "resolved"}),
         }
 
         return success_response(data=data)
-    except (RuntimeError, GoogleAPIError) as exc:
+    except (RuntimeError, PyMongoError) as exc:
         return error_response(str(exc), 500)
 
 
@@ -38,11 +36,15 @@ def dashboard_summary():
 @admin_required
 def problem_type_distribution():
     try:
-        counts = Counter(problem.get("problemType", "unknown") for problem in list_documents("problems"))
-        data = [{"type": key, "count": value} for key, value in counts.most_common()]
+        pipeline = [
+            {"$group": {"_id": "$problemType", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}},
+        ]
+        rows = list(get_collection("problems").aggregate(pipeline))
+        data = [{"type": row["_id"], "count": row["count"]} for row in rows]
 
         return success_response(data=data)
-    except (RuntimeError, GoogleAPIError) as exc:
+    except (RuntimeError, PyMongoError) as exc:
         return error_response(str(exc), 500)
 
 
@@ -50,11 +52,15 @@ def problem_type_distribution():
 @admin_required
 def area_wise_problems():
     try:
-        counts = Counter(problem.get("location", "Unknown") for problem in list_documents("problems"))
-        data = [{"location": key, "count": value} for key, value in counts.most_common()]
+        pipeline = [
+            {"$group": {"_id": "$location", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}},
+        ]
+        rows = list(get_collection("problems").aggregate(pipeline))
+        data = [{"location": row["_id"], "count": row["count"]} for row in rows]
 
         return success_response(data=data)
-    except (RuntimeError, GoogleAPIError) as exc:
+    except (RuntimeError, PyMongoError) as exc:
         return error_response(str(exc), 500)
 
 
@@ -62,8 +68,8 @@ def area_wise_problems():
 @admin_required
 def dashboard_recommendations():
     try:
-        problems = list_documents("problems", order_by="createdAt", descending=True)
-        volunteers = list_documents("volunteers")
+        problems = list(get_collection("problems").find().sort("createdAt", -1))
+        volunteers = list(get_collection("volunteers").find())
 
         data = []
         for problem in problems:
@@ -75,7 +81,7 @@ def dashboard_recommendations():
             )
 
         return success_response(data=data)
-    except (RuntimeError, GoogleAPIError) as exc:
+    except (RuntimeError, PyMongoError) as exc:
         return error_response(str(exc), 500)
 
 
@@ -83,7 +89,7 @@ def dashboard_recommendations():
 @admin_required
 def dashboard_volunteers():
     try:
-        volunteers = list_documents("volunteers", order_by="createdAt", descending=True)
+        volunteers = list(get_collection("volunteers").find().sort("createdAt", -1))
         return success_response(data=[serialize_volunteer(volunteer) for volunteer in volunteers])
-    except (RuntimeError, GoogleAPIError) as exc:
+    except (RuntimeError, PyMongoError) as exc:
         return error_response(str(exc), 500)
