@@ -37,7 +37,7 @@ function setProblemsTable(problems) {
   const table = document.getElementById("problemsTable");
 
   if (!problems.length) {
-    table.innerHTML = '<tr><td colspan="5">No problems found.</td></tr>';
+    table.innerHTML = '<tr><td colspan="7">No problems found.</td></tr>';
     return;
   }
 
@@ -48,6 +48,8 @@ function setProblemsTable(problems) {
           <td>${text(problem.location)}</td>
           <td>${text(problem.problemType)}</td>
           <td>${text(problem.severity)}</td>
+          <td>${text(problem.availability)}</td>
+          <td>${text(problem.workDate)}</td>
           <td>${text(problem.status)}</td>
           <td>${text(problem.description)}</td>
         </tr>
@@ -60,7 +62,7 @@ function setVolunteersTable(volunteers) {
   const table = document.getElementById("volunteersTable");
 
   if (!volunteers.length) {
-    table.innerHTML = '<tr><td colspan="4">No volunteers found.</td></tr>';
+    table.innerHTML = '<tr><td colspan="5">No volunteers found.</td></tr>';
     return;
   }
 
@@ -72,6 +74,7 @@ function setVolunteersTable(volunteers) {
           <td>${skillsCell(volunteer.skills)}</td>
           <td>${text(volunteer.preferredLocation)}</td>
           <td>${text(volunteer.availability)}</td>
+          <td>${text(volunteer.availableDate)}</td>
         </tr>
       `
     )
@@ -82,7 +85,7 @@ function setRecommendationsTable(items) {
   const table = document.getElementById("recommendationsTable");
 
   if (!items.length) {
-    table.innerHTML = '<tr><td colspan="3">No recommendations found.</td></tr>';
+    table.innerHTML = '<tr><td colspan="4">No recommendations found.</td></tr>';
     return;
   }
 
@@ -98,6 +101,7 @@ function setRecommendationsTable(items) {
         <tr>
           <td>${text(item.problem.problemType)} (${text(item.problem.severity)})</td>
           <td>${text(item.problem.location)}</td>
+          <td>${text(item.problem.workDate)}</td>
           <td>${matches}</td>
         </tr>
       `;

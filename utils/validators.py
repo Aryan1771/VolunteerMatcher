@@ -1,3 +1,6 @@
+from datetime import date
+
+
 PROBLEM_TYPES = {"water", "health", "education"}
 AVAILABILITIES = {"weekdays", "weekends", "anytime"}
 PROBLEM_STATUSES = {"open", "assigned", "resolved"}
@@ -12,6 +15,21 @@ def clean_text(value):
 
 def normalize_choice(value):
     return clean_text(value).lower()
+
+
+def validate_date_string(value, field_name, errors):
+    raw_date = clean_text(value)
+    if not raw_date:
+        errors[field_name] = "Date is required."
+        return None
+
+    try:
+        date.fromisoformat(raw_date)
+    except ValueError:
+        errors[field_name] = "Date must use YYYY-MM-DD format."
+        return None
+
+    return raw_date
 
 
 def validate_problem_payload(payload, partial=False):
@@ -51,6 +69,18 @@ def validate_problem_payload(payload, partial=False):
             errors["description"] = "Description is required."
         else:
             cleaned["description"] = description
+
+    if not partial or "availability" in payload:
+        availability = normalize_choice(payload.get("availability"))
+        if availability not in AVAILABILITIES:
+            errors["availability"] = "Availability must be weekdays, weekends, or anytime."
+        else:
+            cleaned["availability"] = availability
+
+    if not partial or "workDate" in payload:
+        work_date = validate_date_string(payload.get("workDate"), "workDate", errors)
+        if work_date:
+            cleaned["workDate"] = work_date
 
     if "status" in payload:
         status = normalize_choice(payload.get("status"))
@@ -108,5 +138,10 @@ def validate_volunteer_payload(payload, partial=False):
             errors["availability"] = "Availability must be weekdays, weekends, or anytime."
         else:
             cleaned["availability"] = availability
+
+    if not partial or "availableDate" in payload:
+        available_date = validate_date_string(payload.get("availableDate"), "availableDate", errors)
+        if available_date:
+            cleaned["availableDate"] = available_date
 
     return cleaned, errors

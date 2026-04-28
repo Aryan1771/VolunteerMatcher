@@ -39,6 +39,21 @@
         <textarea id="description" name="description" class="form-input min-h-32" placeholder="Describe what is happening..." required></textarea>
       </div>
 
+      <div>
+        <label class="form-label" for="problemAvailability">Your Availability</label>
+        <select id="problemAvailability" name="availability" class="form-input" required>
+          <option value="">Select availability</option>
+          <option value="weekdays">Weekdays</option>
+          <option value="weekends">Weekends</option>
+          <option value="anytime">Anytime</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label" for="workDate">Date Work Should Be Done</label>
+        <input id="workDate" name="workDate" class="form-input" type="date" required>
+      </div>
+
       <div id="problemMessage" class="hidden rounded-md px-4 py-3 text-sm"></div>
 
       <button class="primary-button w-full" type="submit">Submit Problem</button>

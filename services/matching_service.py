@@ -13,6 +13,10 @@ def calculate_volunteer_score(problem, volunteer):
     volunteer_location = normalize(volunteer.get("preferredLocation"))
     problem_type = normalize(problem.get("problemType"))
     volunteer_skills = {normalize(skill) for skill in volunteer.get("skills", [])}
+    problem_availability = normalize(problem.get("availability"))
+    volunteer_availability = normalize(volunteer.get("availability"))
+    problem_work_date = normalize(problem.get("workDate"))
+    volunteer_available_date = normalize(volunteer.get("availableDate"))
 
     if problem_location and problem_location == volunteer_location:
         score += 40
@@ -22,7 +26,15 @@ def calculate_volunteer_score(problem, volunteer):
 
     score += int(problem.get("severity", 1)) * 4
 
-    if normalize(volunteer.get("availability")) == "anytime":
+    if problem_availability and volunteer_availability == problem_availability:
+        score += 20
+    elif volunteer_availability == "anytime":
+        score += 10
+
+    if problem_work_date and problem_work_date == volunteer_available_date:
+        score += 30
+
+    if volunteer_availability == "anytime":
         score += 10
 
     return score

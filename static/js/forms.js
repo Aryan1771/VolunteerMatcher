@@ -12,6 +12,18 @@ function selectedSkills(form) {
   return Array.from(form.querySelectorAll('input[name="skills"]:checked')).map((input) => input.value);
 }
 
+function setMinimumDate(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) {
+    return;
+  }
+
+  input.min = new Date().toISOString().split("T")[0];
+}
+
+setMinimumDate("workDate");
+setMinimumDate("availableDate");
+
 const problemForm = document.getElementById("problemForm");
 if (problemForm) {
   problemForm.addEventListener("submit", async (event) => {
@@ -24,6 +36,8 @@ if (problemForm) {
       problemType: formData.get("problemType"),
       severity: Number(formData.get("severity")),
       description: formData.get("description"),
+      availability: formData.get("availability"),
+      workDate: formData.get("workDate"),
     };
 
     try {
@@ -51,6 +65,7 @@ if (volunteerForm) {
       skills: selectedSkills(volunteerForm),
       preferredLocation: formData.get("preferredLocation"),
       availability: formData.get("availability"),
+      availableDate: formData.get("availableDate"),
     };
 
     try {

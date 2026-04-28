@@ -9,6 +9,7 @@ def build_volunteer_document(data):
         "skills": data["skills"],
         "preferredLocation": data["preferredLocation"],
         "availability": data["availability"],
+        "availableDate": data["availableDate"],
         "createdAt": now,
         "updatedAt": now,
     }
@@ -24,6 +25,7 @@ def serialize_volunteer(volunteer, score=None):
         "skills": volunteer.get("skills", []),
         "preferredLocation": volunteer.get("preferredLocation", ""),
         "availability": volunteer.get("availability", ""),
+        "availableDate": volunteer.get("availableDate", ""),
         "createdAt": volunteer.get("createdAt").isoformat() if volunteer.get("createdAt") else None,
         "updatedAt": volunteer.get("updatedAt").isoformat() if volunteer.get("updatedAt") else None,
     }

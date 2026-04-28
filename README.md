@@ -50,6 +50,8 @@ VolunteerMatcher/
   "problemType": "water",
   "severity": 4,
   "description": "No clean drinking water nearby.",
+  "availability": "weekends",
+  "workDate": "2026-05-10",
   "status": "open",
   "createdAt": "datetime",
   "updatedAt": "datetime"
@@ -65,6 +67,7 @@ VolunteerMatcher/
   "skills": ["water", "health"],
   "preferredLocation": "Mumbai",
   "availability": "weekends",
+  "availableDate": "2026-05-10",
   "createdAt": "datetime",
   "updatedAt": "datetime"
 }
@@ -136,6 +139,8 @@ Each volunteer receives a score for a problem:
 Location match       +40
 Skill match          +40
 Severity priority    severity * 4
+Availability match   +20
+Date match           +30
 Anytime availability +10
 ```
 
