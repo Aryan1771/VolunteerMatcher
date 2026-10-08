@@ -1,6 +1,6 @@
-﻿# Smart Volunteer Matching System
+# Smart Volunteer Matching System
 
-VolunteerMatcher is a beginner-friendly Flask web application for connecting local community problems with suitable volunteers. It includes public forms for reporting problems and registering volunteers, an admin dashboard with charts, a simple recommendation engine, and a Gemini-powered help chatbot.
+VolunteerMatcher is a Flask web application for connecting local community problems with suitable volunteers. It includes public forms for reporting problems and registering volunteers, an admin dashboard with charts, a simple recommendation engine, and a Gemini-powered help chatbot.
 
 ## Tech Stack
 
@@ -181,11 +181,11 @@ flask --app app run
 http://127.0.0.1:5000
 ```
 
-## Deploy on Render Free Tier
+## Deploy on Render
 
 1. Push this repository to GitHub.
 2. Create a free MongoDB Atlas cluster and copy its connection string.
-3. In MongoDB Atlas, create a database user and allow network access from Render. For a beginner demo, `0.0.0.0/0` is the simplest option; use a strong database password.
+3. In MongoDB Atlas, create a database user and allow network access from Render. Configure the narrowest supported network access for the deployment and use a dedicated database user.
 4. Create a new Render Web Service.
 5. Connect the GitHub repository: `Aryan1771/VolunteerMatcher`.
 6. Use these settings:
@@ -211,22 +211,10 @@ FLASK_ENV=production
 
 8. Deploy the service and open the Render URL.
 
-## Database Alternatives
+## Operational limits
 
-The current code is configured for MongoDB Atlas because it works well with Render free deployments and the existing PyMongo data layer.
+`MONGO_URI` is required for forms, APIs, and dashboard data. Admin credentials are configured through environment variables. Matching is a deterministic scoring heuristic, not a trained prediction model; a coordinator should review recommendations before assigning work. Gemini availability and credentials affect the chatbot separately from the core matching workflow.
 
-| Database | Best For | Notes |
-| --- | --- | --- |
-| MongoDB Atlas | Recommended for this version | Cloud hosted, free tier available, works with the current code. |
-| Render PostgreSQL | SQL-based Render deployment | Requires replacing PyMongo with SQLAlchemy or psycopg and rewriting queries. |
-| Supabase PostgreSQL | Hosted PostgreSQL with a generous free tier | Requires a SQL schema and query rewrite. |
-| Firebase Firestore | Google-based NoSQL | Requires replacing the MongoDB helper and query code; best if moving the whole app to Google Cloud Run. |
-| SQLite | Local demo only | Easy for learning, but not reliable for Render free production data. |
+## License
 
-For the fastest working website, keep MongoDB Atlas. For a Google-only stack, use Firestore and deploy on Cloud Run instead of Render.
-
-## Notes
-
-- `MONGO_URI` is required for forms, APIs, and dashboard data.
-- Admin credentials are stored in environment variables for simplicity.
-- The existing GPLv3 license is preserved.
+See [LICENSE](LICENSE) for the GNU GPL v3 terms.
